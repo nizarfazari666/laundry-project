@@ -1,129 +1,104 @@
 const express = require('express');
 const cors = require('cors');
-const db = require('./db');
+const mysql = require('mysql');
+const nodemailer = require('nodemailer');
 
-const app = express();
+const app = express();  
 app.use(cors());
 app.use(express.json());
 
-app.post('/api/paket', (req, res) => {
-    const { nama_paket, jenis, harga, estimasi } = req.body;
-    
-    console.log("Data diterima di server:", req.body);
-
-    const sql = "INSERT INTO paket (nama_paket, jenis, harga, estimasi) VALUES (?, ?, ?, ?)";
-    
-    db.query(sql, [nama_paket, jenis, harga, estimasi], (err, result) => {
-        if (err) {
-            console.error("ADA ERROR DATABASE:", err.message); 
-            return res.status(500).json({ success: false, message: err.message });
-        }
-        console.log("Berhasil simpan ke database!");
-        res.json({ success: true, message: "Paket berhasil ditambahkan!" });
-    });
+const db = mysql.createConnection({
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "db_laundry"
 });
 
-app.post('/api/login', (req, res) => {
-    const { username, password } = req.body;
-    const sql = "SELECT * FROM users WHERE username = ? AND password = ?";
-    
-    db.query(sql, [username, password], (err, results) => {
-        if (err) return res.status(500).json({ success: false, message: "Error server" });
-        
-        if (results.length > 0) {
-            res.json({ success: true, user: results[0] });
-        } else {
-            res.status(401).json({ success: false, message: "Username atau Password salah!" });
-        }
-    });
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: 'EMAIL_KAMU@gmail.com', 
+        pass: 'KODE_APP_PASSWORD_16_DIGIT' 
+    }
 });
 
 app.post('/api/register', (req, res) => {
-    const { username, password, nama } = req.body;
-    const role = 'pelanggan'; // Default role
-    
-    const sql = "INSERT INTO users (username, password, nama, role) VALUES (?, ?, ?, ?)";
-    
-    db.query(sql, [username, password, nama, role], (err, result) => {
-        if (err) {
-            console.error("Error Register:", err);
-            return res.status(500).json({ success: false, message: "Username sudah ada atau error database" });
-        }
-        // Bagian ini penting supaya React tidak mendapat 'undefined'
+    const { email, password, nama } = req.body;
+    const role = 'pelanggan';
+    const sql = "INSERT INTO users (email, password, nama, role) VALUES (?, ?, ?, ?)";
+    db.query(sql, [email, password, nama, role], (err, result) => {
+        if (err) return res.status(500).json({ success: false, message: "Email sudah terdaftar!" });
         res.json({ success: true, message: "Registrasi Berhasil!" });
     });
 });
 
-const PORT = 5000;
-
-app.get('/api/paket', (req, res) => {
-    const sql = "SELECT * FROM paket";
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).send(err);
-        res.json(results);
-    });
-});
-
-app.post('/api/paket', (req, res) => {
-    const { nama_paket, jenis, harga, estimasi } = req.body;
-    const sql = "INSERT INTO paket (nama_paket, jenis, harga, estimasi) VALUES (?, ?, ?, ?)";
-    
-    db.query(sql, [nama_paket, jenis, harga, estimasi], (err, result) => {
-        if (err) {
-            console.error("DATABASE ERROR:", err);
-            return res.status(500).json({ success: false, message: err.message });
+app.post('/api/login', (req, res) => {
+    const { email, password } = req.body;
+    const sql = "SELECT * FROM users WHERE email = ? AND password = ?";
+    db.query(sql, [email, password], (err, results) => {
+        if (err) return res.status(500).json({ success: false });
+        if (results.length > 0) {
+            res.json({ success: true, user: results[0] });
+        } else {
+            res.status(401).json({ success: false, message: "Email atau Password salah!" });
         }
-        res.json({ success: true, message: "Paket berhasil ditambahkan!" });
     });
 });
 
-app.delete('/api/paket/:id', (req, res) => {
-    const sql = "DELETE FROM paket WHERE id_paket = ?";
-    db.query(sql, [req.params.id], (err, result) => {
-        if (err) return res.status(500).send(err);
-        res.json({ success: true, message: "Paket dihapus!" });
-    });
-});
+app.post('/api/forgot-password-request', (req, res) => {
+    const { email } = req.body;
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6 Digit
+    const expiry = new Date(Date.now() + 5 * 60000); // 5 Menit
 
-app.get('/api/pelanggan', (req, res) => {
-    db.query("SELECT * FROM pelanggan", (err, results) => {
+    const sql = "UPDATE users SET otp_code = ?, otp_expiry = ? WHERE email = ?";
+    db.query(sql, [otp, expiry, email], (err, result) => {
         if (err) return res.status(500).json(err);
-        res.json(results);
+        if (result.affectedRows === 0) return res.status(404).json({ message: "Email tidak ditemukan" });
+
+        // Kirim Email
+        const mailOptions = {
+            from: 'Laundry App',
+            to: email,
+            subject: 'Kode OTP Reset Password Laundry App',
+            text: `Kode OTP Anda adalah: ${otp}. Kode ini berlaku selama 5 menit.`
+        };
+
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) return res.status(500).json({ message: "Gagal kirim email" });
+            res.json({ success: true, message: "OTP terkirim ke email!" });
+        });
     });
 });
 
 app.post('/api/pelanggan', (req, res) => {
     const { nama_pelanggan, alamat, no_hp } = req.body;
+    
+    console.log("Data Pelanggan Diterima:", req.body);
+
     const sql = "INSERT INTO pelanggan (nama_pelanggan, alamat, no_hp) VALUES (?, ?, ?)";
     db.query(sql, [nama_pelanggan, alamat, no_hp], (err, result) => {
-        if (err) return res.status(500).json({ success: false, message: err.message });
+        if (err) {
+            console.error("EROR TAMBAH PELANGGAN:", err.sqlMessage || err);
+            return res.status(500).json({ success: false, message: err.message });
+        }
         res.json({ success: true, message: "Pelanggan berhasil didaftarkan!" });
     });
 });
 
-app.post('/api/transaksi', (req, res) => {
-    const { id_pelanggan, id_paket, berat, total_harga } = req.body;
-    const sql = "INSERT INTO transaksi (id_pelanggan, id_paket, berat, total_harga) VALUES (?, ?, ?, ?)";
-    db.query(sql, [id_pelanggan, id_paket, berat, total_harga], (err, result) => {
-        if (err) return res.status(500).json({ success: false, message: err.message });
-        res.json({ success: true, message: "Transaksi berhasil disimpan!" });
+app.post('/api/reset-password-otp', (req, res) => {
+    const { email, otp, newPassword } = req.body;
+    const sql = "SELECT * FROM users WHERE email = ? AND otp_code = ? AND otp_expiry > NOW()";
+    
+    db.query(sql, [email, otp], (err, results) => {
+        if (results.length > 0) {
+            const updateSql = "UPDATE users SET password = ?, otp_code = NULL, otp_expiry = NULL WHERE email = ?";
+            db.query(updateSql, [newPassword, email], (err, result) => {
+                res.json({ success: true, message: "Password berhasil diperbarui!" });
+            });
+        } else {
+            res.status(400).json({ success: false, message: "OTP salah atau kadaluarsa" });
+        }
     });
 });
 
-app.get('/api/transaksi', (req, res) => {
-    const sql = `
-        SELECT t.*, p.nama_pelanggan, pk.nama_paket 
-        FROM transaksi t
-        JOIN pelanggan p ON t.id_pelanggan = p.id_pelanggan
-        JOIN paket pk ON t.id_paket = pk.id_paket
-        ORDER BY t.tgl_masuk DESC
-    `;
-    db.query(sql, (err, results) => {
-        if (err) return res.status(500).json(err);
-        res.json(results);
-    });
-});
-
-app.listen(PORT, () => {
-    console.log(`Server berjalan di http://localhost:${PORT}`);
-});
+app.listen(5000, () => console.log(`Server running on port 5000`));

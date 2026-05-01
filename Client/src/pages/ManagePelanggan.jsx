@@ -16,6 +16,19 @@ function ManagePelanggan() {
     } catch (err) { console.error(err) }
   }
 
+const handleTambah = async () => {
+  try {
+    const res = await axios.post('http://localhost:5000/api/pelanggan', {
+      nama_pelanggan: nama, // Cek apakah variabel 'nama' ada isinya
+      alamat: alamat,
+      no_hp: noHp
+    });
+    // ... sisanya
+  } catch (err) {
+    alert("Gagal tambah pelanggan");
+  }
+};
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
