@@ -15,7 +15,6 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/manage-paket" element={<ManagePaket />} />
         <Route path="/manage-pelanggan" element={<ManagePelanggan />} />
-        <Route path="/input-transaksi" element={<InputTransaksi />} />
       </Routes>
     </Router>
   );

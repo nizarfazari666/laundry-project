@@ -1,30 +1,38 @@
 import { Link } from 'react-router-dom';
+// PASTIKAN: Kalau file Home.jsx ini ada langsung di dalam folder 'src', ubah titiknya jadi satu: './assets/bg-laundry.mp4'
+import bgVideo from '../assets/bg-laundry.mp4';
 
 function Home() {
   return (
     <div style={styles.wrapper}>
-      <nav style={styles.navbar}>
-        <div style={styles.logo}>Logo</div>
-        <div style={styles.navLinks}>
-          <span style={styles.navItem}>About</span>
-          <span style={styles.navItem}>Contact</span>
-        </div>
-      </nav>
+      
+      {/* KODE YANG DIPERBAIKI: Langsung taruh src di dalam tag video, hapus tag source */}
+      <video src={bgVideo} autoPlay loop muted playsInline style={styles.videoBg} />
 
-      <div style={styles.container}>
-        <div style={styles.textContent}>
-          <h1 style={styles.title}>Laundry Wangi</h1>
-          <p style={styles.description}>
-            Dengan tenaga profesional dan teknologi modern, kami memastikan setiap pakaian Anda dicuci, dikeringkan, dan dirapikan dengan standar terbaik.
-           Hemat waktu Anda, biarkan kami yang mengurus sisanya.
-          </p>
-          <Link to="/login" style={{ textDecoration: 'none' }}>
-            <button style={styles.btnReadMore}>LOGIN / SIGN IN</button>
-          </Link>
-        </div>
+      {/* BUNGKUS KONTEN DENGAN DIV BARU AGAR ADA DI DEPAN VIDEO */}
+      <div style={styles.contentWrapper}>
+        <nav style={styles.navbar}>
+          <div style={styles.logo}>Laundry Wangi</div>
+          <div style={styles.navLinks}>
+            <span style={styles.navItem}>About</span>
+            <span style={styles.navItem}>Contact</span>
+          </div>
+        </nav>
 
-        <div style={styles.imageContent}></div>
+        <div style={styles.container}>
+          <div style={styles.textContent}>
+            <h1 style={styles.title}>Selamat Datang</h1>
+            <p style={styles.description}>
+              Dengan tenaga profesional dan teknologi modern, kami memastikan setiap pakaian Anda dicuci, dikeringkan, dan dirapikan dengan standar terbaik.
+              Hemat waktu Anda, biarkan kami yang mengurus sisanya.
+            </p>
+            <Link to="/login" style={{ textDecoration: 'none' }}>
+              <button style={styles.btnReadMore}>LOG IN OR SIGN IN</button>
+            </Link>
+          </div>
+        </div>
       </div>
+      
     </div>
   );
 }
@@ -34,10 +42,26 @@ const styles = {
     fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     width: '100vw',
     height: '100vh',
-    backgroundColor: '#fff',
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: '#000', // Warna hitam dasar 
+  },
+  videoBg: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
+    zIndex: 0 // UBAH KE 0 AGAR TIDAK TENGGELAM
+  },
+  contentWrapper: {
+    position: 'relative',
+    zIndex: 10, // KONTEN HARUS LEBIH BESAR DARI 0 AGAR DI DEPAN VIDEO
+    width: '100%',
+    height: '100%',
     display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden'
+    flexDirection: 'column'
   },
   navbar: {
     display: 'flex',
@@ -48,17 +72,19 @@ const styles = {
   logo: {
     fontSize: '28px',
     fontWeight: 'bold',
-    color: '#90d5d5',
+    color: '#fff', 
+    textShadow: '2px 2px 4px rgba(0,0,0,0.5)'
   },
   navLinks: {
     display: 'flex',
     gap: '40px',
   },
   navItem: {
-    color: '#555',
+    color: '#fff', 
     fontSize: '16px',
-    fontWeight: '500',
-    cursor: 'default'
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    textShadow: '1px 1px 3px rgba(0,0,0,0.5)'
   },
   container: {
     display: 'flex',
@@ -68,10 +94,14 @@ const styles = {
   },
   textContent: {
     flex: '1',
-    paddingRight: '50px',
+    maxWidth: '650px',
+    backgroundColor: 'rgba(255, 255, 255, 0.85)', 
+    padding: '40px',
+    borderRadius: '15px',
+    boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
   },
   title: {
-    fontSize: '100px',
+    fontSize: '70px', 
     margin: '0',
     color: '#2c5282',
     fontWeight: 'bold',
@@ -79,9 +109,8 @@ const styles = {
   },
   description: {
     fontSize: '18px',
-    color: '#666',
+    color: '#4a5568',
     margin: '20px 0 40px 0',
-    maxWidth: '450px',
     lineHeight: '1.6'
   },
   btnReadMore: {
@@ -93,15 +122,8 @@ const styles = {
     cursor: 'pointer',
     fontSize: '16px',
     fontWeight: 'bold',
-    transition: '0.3s'
-  },
-  imageContent: {
-    flex: '1',
-    height: '80%',
-    backgroundImage: "url('https://img.freepik.com/free-vector/laundry-service-concept-illustration_114360-1594.jpg')",
-    backgroundSize: 'contain',
-    backgroundPosition: 'center',
-    backgroundRepeat: 'no-repeat',
+    transition: '0.3s',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
   },
 };
 
