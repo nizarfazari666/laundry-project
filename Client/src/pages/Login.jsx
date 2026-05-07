@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+// 1. IMPORT VIDEONYA (Pastikan file ada di src/assets/bg-laundry.mp4)
+// Gunakan './assets/...' jika file Login.jsx ada langsung di dalam folder src
+import bgVideo from '../assets/bg-laundry.mp4'; 
 
 function Login() {
   const [mode, setMode] = useState('login'); 
-  const [step, setStep] = useState(1); // Step 1: Email, Step 2: OTP
+  const [step, setStep] = useState(1); 
   const [nama, setNama] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,7 +35,6 @@ function Login() {
     } catch (err) { alert("Registrasi Gagal!"); }
   };
 
-  // Kirim OTP
   const handleRequestOTP = async (e) => {
     e.preventDefault();
     try {
@@ -44,7 +46,6 @@ function Login() {
     } catch (err) { alert("Email tidak ditemukan!"); }
   };
 
-  // Verifikasi OTP & Reset
   const handleResetPassword = async (e) => {
     e.preventDefault();
     try {
@@ -59,6 +60,9 @@ function Login() {
 
   return (
     <div style={styles.container}>
+      {/* 2. PERBAIKAN TAG VIDEO: Menggunakan variabel bgVideo langsung */}
+      <video src={bgVideo} autoPlay loop muted playsInline style={styles.videoBg} />
+
       <div style={styles.card}>
         <div style={styles.formSection}>
           <button onClick={() => navigate('/')} style={styles.backHome}>← Back to Home</button>
@@ -120,30 +124,40 @@ function Login() {
             )}
           </div>
         </div>
-        <div style={styles.imageSection}>
-          <img src="https://img.freepik.com/free-vector/isometric-laundry-room-composition-with-view-indoor-interior-with-washing-machines-characters-workers_1284-62923.jpg" alt="laundry" style={styles.image} />
-        </div>
       </div>
     </div>
   );
 }
 
-// ... (Gunakan styles yang sama dengan kode kamu sebelumnya) ...
 const styles = {
-    container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#e2e8f0', fontFamily: "'Segoe UI', sans-serif" },
-    card: { display: 'flex', width: '900px', backgroundColor: '#fff', borderRadius: '15px', overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' },
-    formSection: { flex: 1, padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' },
-    backHome: { background: 'none', border: 'none', color: '#2c5282', cursor: 'pointer', marginBottom: '20px', textAlign: 'left', padding: 0 },
-    title: { color: '#1a365d', fontSize: '28px', marginBottom: '5px', fontWeight: 'bold' },
-    subtitle: { color: '#718096', marginBottom: '25px', fontSize: '14px' },
-    inputGroup: { marginBottom: '15px' },
-    label: { display: 'block', marginBottom: '5px', color: '#4a5568', fontSize: '14px', fontWeight: '600', textAlign: 'left' },
-    input: { width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none', boxSizing: 'border-box' },
-    button: { width: '100%', padding: '14px', backgroundColor: '#2c5282', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', marginTop: '10px' },
-    footerLinks: { marginTop: '20px', textAlign: 'center', fontSize: '14px' },
-    link: { color: '#2c5282', cursor: 'pointer', fontWeight: 'bold' },
-    imageSection: { flex: 1, backgroundColor: '#f0f4f8', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' },
-    image: { width: '100%', borderRadius: '10px' }
+  container: { 
+    display: 'flex', justifyContent: 'center', alignItems: 'center', 
+    minHeight: '100vh', fontFamily: "'Segoe UI', sans-serif",
+    position: 'relative', overflow: 'hidden',
+    backgroundColor: '#000' // Dasar hitam jika video loading
+  },
+  videoBg: {
+    position: 'absolute', top: 0, left: 0, width: '100%', height: '100%',
+    objectFit: 'cover', zIndex: 0 // Z-index diatur agar di depan dasar hitam tapi di belakang card
+  },
+  card: { 
+    display: 'flex', 
+    width: '400px', 
+    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+    borderRadius: '15px', overflow: 'hidden', 
+    boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+    zIndex: 10, // Pastikan card ada di paling depan
+    position: 'relative'
+  },
+  formSection: { flex: 1, padding: '40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' },
+  backHome: { background: 'none', border: 'none', color: '#2d7e85', cursor: 'pointer', marginBottom: '20px', textAlign: 'left', padding: 0, fontWeight: 'bold' },
+  title: { color: '#1a365d', fontSize: '28px', marginBottom: '25px', fontWeight: 'bold', textAlign: 'center' },
+  inputGroup: { marginBottom: '15px' },
+  label: { display: 'block', marginBottom: '5px', color: '#4a5568', fontSize: '14px', fontWeight: '600', textAlign: 'left' },
+  input: { width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e0', outline: 'none', boxSizing: 'border-box' },
+  button: { width: '100%', padding: '14px', backgroundColor: '#2a2b2a', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold', marginTop: '10px' },
+  footerLinks: { marginTop: '20px', textAlign: 'center', fontSize: '14px' },
+  link: { color: '#2c5282', cursor: 'pointer', fontWeight: 'bold' },
 };
 
 export default Login;

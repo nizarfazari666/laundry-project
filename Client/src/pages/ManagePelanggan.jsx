@@ -19,11 +19,10 @@ function ManagePelanggan() {
 const handleTambah = async () => {
   try {
     const res = await axios.post('http://localhost:5000/api/pelanggan', {
-      nama_pelanggan: nama, // Cek apakah variabel 'nama' ada isinya
+      nama_pelanggan: nama,
       alamat: alamat,
       no_hp: noHp
     });
-    // ... sisanya
   } catch (err) {
     alert("Gagal tambah pelanggan");
   }
