@@ -266,9 +266,8 @@ function Dashboard() {
   const dataLaporan = Object.keys(laporanPendapatan).map(tgl => ({ tanggal: tgl, total: laporanPendapatan[tgl] }));
   const totalSemuaPendapatan = dataLaporan.reduce((sum, item) => sum + item.total, 0);
 
-  // FIX: Terapkan Toleransi Huruf Kecil Saat Memeriksa Posisi Chat
   const renderChatBubble = (c, index) => {
-    let actualRole = (c.sender_role || '').toLowerCase(); // Paksa jadi huruf kecil
+    let actualRole = (c.sender_role || '').toLowerCase(); 
     let text = c.pesan || '';
 
     if (actualRole === 'admin' && text.startsWith('[K]')) {
@@ -277,7 +276,7 @@ function Dashboard() {
     }
     
     const myRole = isAdmin ? 'admin' : (isKurir ? 'kurir' : 'pelanggan');
-    const isMe = actualRole === myRole; // Pengecekan sekarang akurat
+    const isMe = actualRole === myRole; 
 
     let bubbleStyle = isMe ? styles.chatBubbleRight : styles.chatBubbleLeft;
     
@@ -362,6 +361,8 @@ function Dashboard() {
                     </td>
                     <td style={styles.td}>
                       <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+                        
+                        {/* ======================= FITUR BARU ADMIN DI SINI ======================= */}
                         {isAdmin ? (
                           <>
                             <select value={t.status} onChange={(e) => ubahStatus(t.id_transaksi, e.target.value)} style={styles.selectSmall}>
@@ -370,10 +371,21 @@ function Dashboard() {
                               <option value="Proses Pengantaran">🛵 Antar</option>
                               <option value="Selesai">✅ Selesai</option>
                             </select>
-                            <button style={{color: '#48bb78', border:'none', background:'none', cursor:'pointer', fontSize:'11px'}} onClick={() => {setActiveChatUser(t.nama_pelanggan);}}>Chat</button>
+
+                            {/* FITUR BARU: Tombol Kasir/Bayar Offline khusus Admin */}
+                            <button 
+                               style={{...styles.btnActionPelanggan, backgroundColor: t.status_bayar === 'Lunas' ? '#3182ce' : '#e53e3e'}} 
+                               onClick={() => setInvoiceData(t)}
+                            >
+                               {t.status_bayar === 'Lunas' ? 'Lihat Struk' : 'Bayar Offline'}
+                            </button>
+
+                            <button style={{color: '#48bb78', border:'none', background:'none', cursor:'pointer', fontSize:'11px', fontWeight: 'bold'}} onClick={() => {setActiveChatUser(t.nama_pelanggan);}}>Chat</button>
                             {t.bukti_foto && <a href={`http://localhost:5000/uploads/${t.bukti_foto}`} target="_blank" rel="noreferrer" style={styles.btnProof}>Lihat Foto</a>}
                           </>
                         ) : isKurir ? (
+                        /* ========================================================================= */
+
                           <>
                             <select value={t.status} onChange={(e) => ubahStatus(t.id_transaksi, e.target.value)} style={styles.selectSmall}>
                               <option value="Proses Pengantaran">🛵 Antar</option>
@@ -400,7 +412,7 @@ function Dashboard() {
           </div>
         </section>
 
-        {/* MODAL INVOICE LENGKAP */}
+        {/* MODAL INVOICE LENGKAP & PEMBAYARAN KASIR */}
         {invoiceData && (
           <Modal title="Detail Invoice & Pembayaran" onClose={tutupInvoice}>
             <div id="invoice-print" style={styles.invoiceBox}>
@@ -437,7 +449,10 @@ function Dashboard() {
 
             <div className="no-print" style={{ marginTop: '20px' }}>
               {!isPaying && invoiceData.status_bayar !== 'Lunas' ? (
-                <button style={styles.btnPrimary} onClick={() => setIsPaying(true)}>Pilih Pembayaran</button>
+                <button style={styles.btnPrimary} onClick={() => setIsPaying(true)}>
+                   {/* FITUR BARU: Teks tombol disesuaikan jika admin */}
+                   {isAdmin ? "Proses Pembayaran (Kasir)" : "Pilih Pembayaran"}
+                </button>
               ) : isPaying ? (
                 <div style={{ backgroundColor: '#f9fafb', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <label style={{ fontSize: '12px', fontWeight: 'bold', display: 'block', marginBottom: '8px' }}>Pilih Metode Payment:</label>
